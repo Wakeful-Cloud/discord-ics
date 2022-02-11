@@ -1,0 +1,36 @@
+{
+  "name": "discord-ics",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Discord bot to import an ICS file",
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "ts-node src/index.ts"
+  },
+  "dependencies": {
+    "@wakeful-cloud/html-translator": "^1.1.1",
+    "cli-progress": "^3.10.0",
+    "discord.js": "^13.6.0",
+    "dotenv": "^16.0.0",
+    "luxon": "^2.3.0",
+    "node-ical": "^0.14.1",
+    "ts-node": "^10.5.0"
+  },
+  "devDependencies": {
+    "@types/cli-progress": "^3.9.2",
+    "@types/luxon": "^2.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.11.0",
+    "@typescript-eslint/parser": "^5.11.0",
+    "eslint": "^8.8.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Wakeful-Cloud/discord-ics.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Wakeful-Cloud/discord-ics/issues"
+  },
+  "homepage": "https://github.com/Wakeful-Cloud/discord-ics#readme"
+}
