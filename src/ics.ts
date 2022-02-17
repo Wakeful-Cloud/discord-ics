@@ -55,8 +55,11 @@ export const fetchEvents = async (url: string) =>
 
       return event.rrule.all().map(raw =>
       {
-        //Convert recurrence to Luxon DateTime
-        const recurrence = DateTime.fromJSDate(raw);
+        //Convert recurrence to Luxon DateTime and adjust for daylight savings time
+        let recurrence = DateTime.fromJSDate(raw);
+        recurrence = recurrence.plus({
+          minutes: start.offset - recurrence.offset
+        });
 
         return {
           name: event.summary,
