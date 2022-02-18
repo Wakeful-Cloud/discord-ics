@@ -22,7 +22,7 @@ export const fetchEvents = async (url: string) =>
   const now = new Date(Date.now());
 
   //Filter events
-  const futureEvents = Object.values(res).filter(event => (event.start as Date) > now && event.type == 'VEVENT') as VEvent[];
+  const futureEvents = Object.values(res).filter(event => event.type == 'VEVENT' && (event.start as Date) > now) as VEvent[];
 
   //Resolve events
   const resolvedEvents = futureEvents.flatMap(event =>
