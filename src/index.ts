@@ -3,14 +3,21 @@
  */
 
 //Imports
-import 'dotenv/config';
-import {createEvents, initializeClient} from './discord';
+import {DateTime} from 'luxon';
 import {fetchEvents} from './ics';
+import {createEvents, initializeClient} from './discord';
+import 'dotenv/config';
 
 const main = async () =>
 {
+  //Compute start and end
+  const start = DateTime.now();
+  const end = start.plus({
+    seconds: parseInt(process.env.SYNCHRONIZATION_LIMIT || '604800', 10)
+  });
+
   //Fetch events
-  const events = await fetchEvents(process.env.ICS_URL as string);
+  const events = await fetchEvents(process.env.ICS_URL as string, start.toJSDate(), end.toJSDate());
 
   //Initialize the client
   const client = await initializeClient(process.env.DISCORD_TOKEN as string);

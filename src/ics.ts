@@ -3,74 +3,109 @@
  */
 
 //Imports
-import translate from '@wakeful-cloud/html-translator';
 import {DateTime} from 'luxon';
 import {Event} from './types';
-import {async as ical, VEvent} from 'node-ical';
+import {async as ical, CalendarComponent, VEvent} from 'node-ical';
 
 /**
- * Fetch future calendar events from a remote ICS file
- * @param url ICS file URL
- * @returns Future calendar events
+ * Filter a calendar component
+ * @param component Calendar component
+ * @param start Valid window start
+ * @param end Valid window end
+ * @returns Calendar events occurring durning the window
  */
-export const fetchEvents = async (url: string) =>
+const componentFilter = (component: CalendarComponent, start: Date, end: Date) =>
+  component.type == 'VEVENT' &&
+  (component.start as Date) < end && (
+    (component.rrule != null && component.rrule.options.until != null && start < component.rrule.options.until) ||
+    (start < (component.end as Date))
+  );
+
+/**
+ * Fetch calendar events during a certain period from a remote ICS file
+ * @param url ICS file URL
+ * @param start Start date/time
+ * @param end End date/time
+ * @returns Calendar events
+ */
+export const fetchEvents = async (url: string, start: Date, end: Date) =>
 {
   //Download and parse the ICS file
   const res = await ical.fromURL(url);
 
-  //Get current date/time
-  const now = new Date(Date.now());
-
   //Filter events
-  const futureEvents = Object.values(res).filter(event => event.type == 'VEVENT' && (event.start as Date) > now) as VEvent[];
+  const filteredEvents = Object.values(res).filter(component => componentFilter(component, start, end)) as VEvent[];
 
   //Resolve events
-  const resolvedEvents = futureEvents.flatMap(event =>
+  const resolvedEvents: Event[] = [];
+  for (const event of filteredEvents)
   {
-    //Translate the description
-    let {markdown: description} = translate(event.description, true);
-    if (description.length > 1000)
-    {
-      description = `${description.substring(0, 997)}...`;
-    }
-
-    //Convert dates to Luxon DateTimes
-    const start = DateTime.fromJSDate(event.start);
-    const end = DateTime.fromJSDate(event.end);
-
+    //Non-recurring event
     if (event.rrule == null)
     {
-      return {
+      //Append
+      resolvedEvents.push({
         name: event.summary,
-        description,
+        description: event.description,
         location: event.location,
-        start: start.toJSDate(),
-        end: end.toJSDate()
-      } as Event;
-    }
-    else
-    {
-      //Compute recurrence duration
-      const duration = end.diff(start);
-
-      return event.rrule.all().map(raw =>
-      {
-        //Convert recurrence to Luxon DateTime and adjust for daylight savings time
-        let recurrence = DateTime.fromJSDate(raw);
-        recurrence = recurrence.plus({
-          minutes: start.offset - recurrence.offset
-        });
-
-        return {
-          name: event.summary,
-          description,
-          location: event.location,
-          start: recurrence.toJSDate(),
-          end: recurrence.plus(duration).toJSDate()
-        } as Event;
+        start: event.start,
+        end: event.end
       });
     }
-  });
+    //Recurring event
+    else
+    {
+      //Convert dates to Luxon DateTimes
+      const eventStart = DateTime.fromJSDate(event.start);
+      const eventEnd = DateTime.fromJSDate(event.end);
+
+      //Compute recurrence duration
+      const duration = eventEnd.diff(eventStart);
+
+      //Cast exceptions and overrides
+      const exceptions = event.exdate as Record<string, Date> | undefined;
+      const overrides = (event as any)?.recurrences as Record<string, VEvent> | undefined;
+
+      //Get recurrences
+      const recurrences = event.rrule.between(start, end);
+
+      //Resolve recurrences
+      for (let rawRecurrenceStart of recurrences)
+      {
+        //Generate date lookup key
+        const key = DateTime.fromJSDate(rawRecurrenceStart).toISODate();
+
+        //Skip exceptions
+        if (exceptions != null && exceptions[key] != null)
+        {
+          continue;
+        }
+
+        //Get recurrence event
+        let recurrenceEvent = event;
+        if (overrides != null && overrides[key] != null)
+        {
+          recurrenceEvent = overrides[key]!;
+          rawRecurrenceStart = recurrenceEvent.start;
+        }
+
+        //Compute the recurrence start
+        let recurrenceStart = DateTime.fromJSDate(rawRecurrenceStart);
+        recurrenceStart = recurrenceStart.plus({
+          minutes: eventStart.offset - recurrenceStart.offset
+        });
+
+        //Append
+        resolvedEvents.push({
+          name: recurrenceEvent.summary,
+          description: recurrenceEvent.description,
+          location: recurrenceEvent.location,
+          start: recurrenceStart.toJSDate(),
+          end: recurrenceStart.plus(duration).toJSDate()
+        });
+      }
+    }
+  }
 
   return resolvedEvents;
 };

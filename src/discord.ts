@@ -3,6 +3,7 @@
  */
 
 //Imports
+import translate from '@wakeful-cloud/html-translator';
 import {Client, Guild, Intents} from 'discord.js';
 import {Event} from './types';
 import {Presets, SingleBar} from 'cli-progress';
@@ -45,11 +46,18 @@ export const createEvents = async (server: Guild, events: Event[]) =>
 
   for (const event of events)
   {
+    //Translate the description
+    let {markdown: description} = translate(event.description, true);
+    if (description.length > 1000)
+    {
+      description = `${description.substring(0, 997)}...`;
+    }
+
     //Create the Discord event
     await server.scheduledEvents.create({
       entityType: 'EXTERNAL',
       name: event.name,
-      description: event.description,
+      description,
       scheduledStartTime: event.start,
       scheduledEndTime: event.end,
       privacyLevel: 'GUILD_ONLY',

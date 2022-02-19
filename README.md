@@ -4,11 +4,12 @@ Discord bot to import an ICS file
 ## Documentation
 
 ### Environment Variables
-Name | Description
---- | ---
-`DISCORD_TOKEN` | Discord bot token
-`DISCORD_SERVER` | Discord server ID
-`ICS_URL` | Publicly accessible ICS file URL
+Name | Required | Description
+--- | --- | ---
+`DISCORD_TOKEN` | ✅ | Discord bot token
+`DISCORD_SERVER` | ✅ | Discord server ID
+`ICS_URL` | ✅ | Publicly accessible ICS file URL
+`SYNCHRONIZATION_LIMIT` | ❌ (Defaults to `604800` or 1 week) | Number of seconds into the future to synchronize events during
 
 ### Use
 1. Create an application in the [Discord Developer portal](https://discord.com/developers/applications)
