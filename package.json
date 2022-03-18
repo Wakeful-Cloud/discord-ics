@@ -12,8 +12,9 @@
     "cli-progress": "^3.10.0",
     "discord.js": "^13.6.0",
     "dotenv": "^16.0.0",
+    "got": "^11.8.3",
+    "ical-expander": "^3.1.0",
     "luxon": "^2.3.0",
-    "node-ical": "^0.14.1",
     "ts-node": "^10.5.0"
   },
   "devDependencies": {

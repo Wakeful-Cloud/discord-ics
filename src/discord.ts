@@ -5,7 +5,7 @@
 //Imports
 import translate from '@wakeful-cloud/html-translator';
 import {Client, Guild, Intents} from 'discord.js';
-import {Event} from './types';
+import {Event} from './ics';
 import {Presets, SingleBar} from 'cli-progress';
 
 /**
