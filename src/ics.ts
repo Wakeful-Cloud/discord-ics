@@ -41,23 +41,27 @@ export const fetchEvents = async (url: string, start: Date, end: Date) =>
 
   //Resolve events
   const events = [
-    //Add events
-    ...data.events.map(event => ({
-      name: event.summary,
-      description: event.description,
-      location: event.location,
-      start: event.startDate.toJSDate(),
-      end: event.endDate.toJSDate()
-    } as Event)),
+    //Filter and add events
+    ...data.events
+      .filter(event => start < event.startDate.toJSDate())
+      .map(event => ({
+        name: event.summary,
+        description: event.description,
+        location: event.location,
+        start: event.startDate.toJSDate(),
+        end: event.endDate.toJSDate()
+      } as Event)),
 
-    //Add occurrences
-    ...data.occurrences.map(occurrence => ({
-      name: occurrence.item.summary,
-      description: occurrence.item.description,
-      location: occurrence.item.location,
-      start: occurrence.startDate.toJSDate(),
-      end: occurrence.endDate.toJSDate()
-    } as Event))
+    //Filter and add occurrences
+    ...data.occurrences
+      .filter(occurrence => start < occurrence.startDate.toJSDate())
+      .map(occurrence => ({
+        name: occurrence.item.summary,
+        description: occurrence.item.description,
+        location: occurrence.item.location,
+        start: occurrence.startDate.toJSDate(),
+        end: occurrence.endDate.toJSDate()
+      } as Event))
   ];
 
   return events;
