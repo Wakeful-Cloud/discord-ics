@@ -53,16 +53,22 @@ export const createEvents = async (server: Guild, events: Event[]) =>
       description = `${description.substring(0, 997)}...`;
     }
 
+    //Get the location
+    const location = event.location != '' ? event.location : 'Unknown';
+
+    //Get the end time (If the start and end time are identical, add 1 millisecond to the end time so Discord doesn't complain)
+    const end = event.start.getTime() == event.end.getTime() ? new Date(event.end.getTime() + 1) : event.end;
+
     //Create the Discord event
     await server.scheduledEvents.create({
       entityType: 'EXTERNAL',
       name: event.name,
       description,
       scheduledStartTime: event.start,
-      scheduledEndTime: event.end,
+      scheduledEndTime: end,
       privacyLevel: 'GUILD_ONLY',
       entityMetadata: {
-        location: event.location != '' ? event.location : 'Unknown'
+        location
       }
     });
 
