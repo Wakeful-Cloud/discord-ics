@@ -24,3 +24,9 @@ npm install
 ```bash
 npm run start
 ```
+
+### FAQ's
+* Q: Does this bot synchronize the calendar once-off or on a regular schedule?
+* A: Once-off. I am working on a bot that can repeatedly synchronize the calendar (without creating duplicate events). As a temporary workaround, you can set a low `SYNCHRONIZATION_LIMIT` (eg: 1 day) and run the bot more frequently (Though you'll only see events nearer to when they occur).
+* Q: I ran the bot several times. Why did I get duplicate events?
+* A: The bot doesn't track what events it's already created, so it doesn't know whether or not it's already created an event.
